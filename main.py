@@ -18,6 +18,7 @@ def run_ec2_from_file(filepath):
         file.write(response['KeyMaterial'])
     ##user data for ssh
     ud = build_userdata(server['users'])
+    ##this will run in the default instance, if you plan on running somewhere else you will need to add SubnetId with a valid subnet
     response = ec2_client.run_instances(
         ImageId=server['ami_type'],
         InstanceType=server['instance_type'],
@@ -46,6 +47,7 @@ def build_volumes(volume):
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
         return response['VolumeId']
 
+#Not 100% of building the user data which is why I added the key_pair to be able to ssh with pem key setup
 def build_userdata(users):
     ud = "#!/bin/bash " \
          "echo "+ users[0]['ssh_key'] + " > /home/"+users[0]['login']+"/.ssh/authorized_keys" \

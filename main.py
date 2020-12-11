@@ -9,13 +9,19 @@ def import_yaml(file):
     l = list(docs)
     return l
 
-def create_ec2_from_file(filepath):
+def run_ec2_from_file(filepath):
     data = import_yaml(filepath)
     server = data[0]['server']
     ec2_client = boto3.client('ec2')
+    #create default key pair for other user to ssh
+    response = ec2_client.create_key_pair(KeyName='ec2Key')
+    with open('./my_key.pem', 'w') as file:
+        file.write(response['key_material'])
+
     response = ec2_client.run_instances(
         ImageID=server['ami_type'],
         InstanceType=server['instance_type'],
+        KeyName='ec2Key',
     )
     instanceID = response['Instances'][0]['InstanceId']
     for v in server['volumes']:
@@ -37,8 +43,9 @@ def build_volumes(volume):
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
         return response['VolumeId']
 
+
 def run():
-    create_ec2_from_file("./config.yaml")
+    run_ec2_from_file("./config.yaml")
 
 
 if __name__ == '__main__':

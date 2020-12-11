@@ -15,13 +15,15 @@ def run_ec2_from_file(filepath):
     #create default key pair for other user to ssh
     response = ec2_client.create_key_pair(KeyName='ec2Key')
     with open('./my_key.pem', 'w') as file:
-        file.write(response['key_material'])
+        file.write(response['KeyMaterial'])
     ##user data for ssh
     ud = build_userdata(server['users'])
     response = ec2_client.run_instances(
-        ImageID=server['ami_type'],
+        ImageId=server['ami_type'],
         InstanceType=server['instance_type'],
         KeyName='ec2Key',
+        MaxCount=1,
+        MinCount=1,
         UserData=ud
     )
     instanceID = response['Instances'][0]['InstanceId']
